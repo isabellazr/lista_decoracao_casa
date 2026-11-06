@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Nossa Lista de Decoração</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=DM+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f2f4f1;
+    --surface: #ffffff;
+    --ink: #1c2622;
+    --muted: #5d6b65;
+    --line: #d9e0db;
+    --accent: #1f6f5c;
+    --accent-ink: #ffffff;
+    --accent-soft: #dcebe5;
+    --danger: #a63a3a;
+    --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --f-body: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141b18; --surface: #1d2622; --ink: #e9efeb; --muted: #9fb0a8; --line: #33423b;
+      --accent: #5cc0a3; --accent-ink: #0e1a15; --accent-soft: #23372f; --danger: #e48a8a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141b18; --surface: #1d2622; --ink: #e9efeb; --muted: #9fb0a8; --line: #33423b;
+    --accent: #5cc0a3; --accent-ink: #0e1a15; --accent-soft: #23372f; --danger: #e48a8a;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5;
+    padding-block: 28px 48px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .wrap { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+  h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+
+  header { display: flex; flex-direction: column; gap: 6px; }
+  .eyebrow { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  h1 { font-size: clamp(30px, 7vw, 46px); line-height: 1.05; font-weight: 700; }
+  .hint { font-size: 13px; color: var(--muted); }
+
+  .totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+  .total { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+  .total .lbl { font-size: 13px; color: var(--muted); }
+  .total .val { font-family: var(--f-display); font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .total .sub { font-size: 13px; color: var(--muted); }
+  .total.main { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .total.main .lbl, .total.main .sub { color: var(--accent-ink); opacity: .85; }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+  .chip {
+    border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 14px;
+    cursor: pointer; font-size: 14px; min-height: 36px;
+  }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .btn {
+    border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 8px 14px;
+    cursor: pointer; font-weight: 500; min-height: 40px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+  }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  .btn.danger { color: var(--danger); }
+  .btn.small { min-height: 34px; padding: 4px 12px; font-size: 14px; }
+  .btn:disabled { opacity: .55; cursor: default; }
+
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+  .panel h2 { font-size: 20px; margin-bottom: 12px; }
+  .form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .field.full { grid-column: 1 / -1; }
+  .field label { font-size: 13px; font-weight: 600; color: var(--muted); }
+  .field input, .field select, .field textarea {
+    background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; width: 100%; min-width: 0;
+  }
+  .field textarea { resize: vertical; min-height: 64px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .msg { font-size: 14px; color: var(--muted); }
+  .msg.err { color: var(--danger); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px;
+    display: flex; flex-direction: column; gap: 10px; min-width: 0;
+  }
+  .card.bought { opacity: .72; }
+  .card .top { display: flex; gap: 8px; justify-content: space-between; align-items: flex-start; }
+  .tag { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 3px 9px; border-radius: 6px; }
+  .done { font-size: 12px; font-weight: 600; color: var(--muted); border: 1px solid var(--line); padding: 2px 8px; border-radius: 6px; }
+  .card h3 { font-size: 19px; line-height: 1.2; overflow-wrap: anywhere; }
+  .price { font-family: var(--f-display); font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .store { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+  .note { font-size: 14px; overflow-wrap: anywhere; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: auto; }
+  .heart { display: inline-flex; gap: 6px; align-items: center; }
+  .heart[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+  .empty { text-align: center; padding: 36px 20px; color: var(--muted); border: 1px dashed var(--line); border-radius: 12px; }
+  .empty strong { display: block; font-family: var(--f-display); font-size: 20px; color: var(--ink); margin-bottom: 4px; }
+
+  @media (max-width: 520px) { .form { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: no-preference) { .card { transition: opacity .2s; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Casa nova</span>
+    <h1>Nossa lista de decoração</h1>
+    <span class="hint">Lista compartilhada: quem abre este link vê os mesmos itens.</span>
+  </header>
+
+  <section class="totals" aria-label="Totais">
+    <div class="total main"><div class="lbl">Falta comprar</div><div class="val" id="t-open">R$ 0,00</div><div class="sub" id="t-open-n">0 itens</div></div>
+    <div class="total"><div class="lbl">Já comprado</div><div class="val" id="t-done">R$ 0,00</div><div class="sub" id="t-done-n">0 itens</div></div>
+  </section>
+
+  <section class="panel" id="form-panel" hidden>
+    <h2 id="form-title">Adicionar produto</h2>
+    <form class="form" id="form" novalidate>
+      <div class="field full"><label for="f-name">Produto</label><input id="f-name" required maxlength="120" placeholder="Ex.: Luminária de mesa"></div>
+      <div class="field"><label for="f-price">Preço (R$)</label><input id="f-price" inputmode="decimal" placeholder="Ex.: 189,90"></div>
+      <div class="field"><label for="f-room">Cômodo</label>
+        <select id="f-room"></select></div>
+      <div class="field"><label for="f-store">Onde vende</label><input id="f-store" maxlength="80" placeholder="Ex.: Mercado Livre, Tok&amp;Stok"></div>
+      <div class="field"><label for="f-link">Link do produto</label><input id="f-link" inputmode="url" maxlength="500" placeholder="https://..."></div>
+      <div class="field full"><label for="f-note">Observação</label><textarea id="f-note" maxlength="300" placeholder="Cor, tamanho, por que escolhemos..."></textarea></div>
+      <div class="field full actions">
+        <button class="btn primary" type="submit" id="f-save">Salvar produto</button>
+        <button class="btn" type="button" id="f-cancel">Cancelar</button>
+        <span class="msg" id="f-msg" role="status"></span>
+      </div>
+    </form>
+  </section>
+
+  <section class="toolbar" aria-label="Filtros">
+    <div class="chips" id="room-chips"></div>
+    <div class="actions">
+      <div class="chips" id="status-chips"></div>
+      <button class="btn primary" id="add-btn" hidden>+ Adicionar produto</button>
+    </div>
+  </section>
+
+  <div class="msg" id="load-msg" role="status">Carregando a lista...</div>
+  <section class="grid" id="grid" aria-label="Produtos"></section>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+(function () {
+  var ROOMS = ["Sala", "Quarto", "Cozinha", "Banheiro", "Varanda", "Outros"];
+  var STATUSES = [["all", "Todos"], ["open", "A comprar"], ["done", "Comprados"]];
+  var brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+
+  var db = null, uid = null, isAdmin = false, canVote = false;
+  var products = [], votes = [];
+  var roomFilter = "all", statusFilter = "all", editingId = null, confirmId = null, loaded = false;
+
+  var $ = function (id) { return document.getElementById(id); };
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function fmt(n) { return brl.format(n || 0); }
+  function plural(n) { return n + (n === 1 ? " item" : " itens"); }
+
+  function parsePrice(s) {
+    s = String(s || "").replace(/[^\d.,]/g, "");
+    if (!s) return 0;
+    if (s.indexOf(",") > -1) s = s.replace(/\./g, "").replace(",", ".");
+    var v = parseFloat(s);
+    return isFinite(v) && v >= 0 ? v : 0;
+  }
+  function cleanLink(s) {
+    s = String(s || "").trim();
+    if (!s) return "";
+    if (!/^https?:\/\//i.test(s)) s = "https://" + s;
+    try { var u = new URL(s); return /^https?:$/.test(u.protocol) ? u.href : ""; } catch (e) { return ""; }
+  }
+
+  // ---------- Firebase (banco compartilhado) ----------
+  var firebaseConfig = {
+    apiKey: "AIzaSyCKw9D0SC3QOnggi9Tesy3J_gu0AlGEgP8",
+    authDomain: "decoracao-casa-66bee.firebaseapp.com",
+    projectId: "decoracao-casa-66bee",
+    storageBucket: "decoracao-casa-66bee.firebasestorage.app",
+    messagingSenderId: "459151862231",
+    appId: "1:459151862231:web:fbb1f7c116af6d1834c392"
+  };
+
+  // identificador anônimo deste navegador (usado para o "Gostei", 1 por pessoa)
+  function getUid() {
+    var k = "lista-decoracao-uid", v = null;
+    try { v = localStorage.getItem(k); } catch (e) {}
+    if (!v) {
+      v = "u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+      try { localStorage.setItem(k, v); } catch (e) {}
+    }
+    return v;
+  }
+
+  // ---------- Filtros ----------
+  function renderChips(box, items, current, onPick) {
+    box.textContent = "";
+    items.forEach(function (it) {
+      var b = el("button", "chip", it[1]);
+      b.type = "button";
+      b.setAttribute("aria-pressed", it[0] === current ? "true" : "false");
+      b.addEventListener("click", function () { onPick(it[0]); });
+      box.appendChild(b);
+    });
+  }
+  function renderFilters() {
+    var rooms = [["all", "Todos os cômodos"]].concat(ROOMS.map(function (r) { return [r, r]; }));
+    renderChips($("room-chips"), rooms, roomFilter, function (v) { roomFilter = v; render(); });
+    renderChips($("status-chips"), STATUSES, statusFilter, function (v) { statusFilter = v; render(); });
+  }
+
+  function heartsFor(pid) {
+    var n = 0, mine = false;
+    votes.forEach(function (v) { if (v.pid === pid) { n++; if (v.uid === uid) mine = true; } });
+    return { n: n, mine: mine };
+  }
+
+  function render() {
+    var openSum = 0, openN = 0, doneSum = 0, doneN = 0;
+    products.forEach(function (p) {
+      if (p.status === "done") { doneSum += p.price || 0; doneN++; } else { openSum += p.price || 0; openN++; }
+    });
+    $("t-open").textContent = fmt(openSum); $("t-open-n").textContent = plural(openN);
+    $("t-done").textContent = fmt(doneSum); $("t-done-n").textContent = plural(doneN);
+
+    renderFilters();
+
+    var list = products.filter(function (p) {
+      return (roomFilter === "all" || p.room === roomFilter) &&
+             (statusFilter === "all" || (statusFilter === "done") === (p.status === "done"));
+    }).sort(function (a, b) {
+      var ad = a.status === "done" ? 1 : 0, bd = b.status === "done" ? 1 : 0;
+      return ad - bd || (b.createdAt || 0) - (a.createdAt || 0);
+    });
+
+    var grid = $("grid");
+    grid.textContent = "";
+    if (!list.length && loaded) {
+      var e = el("div", "empty"); e.style.gridColumn = "1 / -1";
+      if (!products.length) {
+        e.appendChild(el("strong", null, "Nenhum produto ainda"));
+        e.appendChild(document.createTextNode("Toque em \"Adicionar produto\" para colocar o primeiro item, com preço e onde comprar."));
+      } else {
+        e.appendChild(el("strong", null, "Nada neste filtro"));
+        e.appendChild(document.createTextNode("Troque o cômodo ou o status para ver os outros produtos."));
+      }
+      grid.appendChild(e); return;
+    }
+    list.forEach(function (p) { grid.appendChild(card(p)); });
+  }
+
+  function card(p) {
+    var c = el("article", "card" + (p.status === "done" ? " bought" : ""));
+    var top = el("div", "top");
+    top.appendChild(el("span", "tag", p.room || "Outros"));
+    if (p.status === "done") top.appendChild(el("span", "done", "Comprado"));
+    c.appendChild(top);
+    c.appendChild(el("h3", null, p.name));
+    c.appendChild(el("div", "price", p.price ? fmt(p.price) : "Sem preço"));
+    if (p.store) c.appendChild(el("div", "store", "Vende em: " + p.store));
+    if (p.note) c.appendChild(el("div", "note", p.note));
+
+    var row = el("div", "row");
+    if (p.link) {
+      var a = el("a", "btn small primary", "Ver na loja");
+      a.href = p.link; a.target = "_blank"; a.rel = "noopener noreferrer";
+      row.appendChild(a);
+    }
+    var h = heartsFor(p.id);
+    var hb = el("button", "btn small heart");
+    hb.type = "button";
+    hb.setAttribute("aria-pressed", h.mine ? "true" : "false");
+    hb.setAttribute("aria-label", "Gostei deste produto");
+    hb.textContent = (h.mine ? "♥ " : "♡ ") + (h.n ? h.n : "Gostei");
+    if (canVote && uid) hb.addEventListener("click", function () { toggleVote(p.id, h.mine, hb); });
+    else hb.disabled = true;
+    row.appendChild(hb);
+
+    if (isAdmin) {
+      var st = el("button", "btn small", p.status === "done" ? "Voltar p/ lista" : "Marcar comprado");
+      st.type = "button";
+      st.addEventListener("click", function () { st.disabled = true; db.doc("products/" + p.id).update({ status: p.status === "done" ? "open" : "done" }).catch(fail); });
+      var ed = el("button", "btn small", "Editar"); ed.type = "button";
+      ed.addEventListener("click", function () { startEdit(p); });
+      var del = el("button", "btn small danger", confirmId === p.id ? "Confirmar exclusão" : "Excluir"); del.type = "button";
+      del.addEventListener("click", function () {
+        if (confirmId !== p.id) { confirmId = p.id; render(); return; }
+        confirmId = null; del.disabled = true;
+        db.doc("products/" + p.id).delete().catch(fail);
+      });
+      row.appendChild(st); row.appendChild(ed); row.appendChild(del);
+    }
+    c.appendChild(row);
+    return c;
+  }
+
+  function fail() { $("load-msg").hidden = false; $("load-msg").textContent = "Não foi possível salvar agora. Tente de novo em instantes."; $("load-msg").className = "msg err"; }
+
+  function toggleVote(pid, mine, btn) {
+    btn.disabled = true;
+    var ref = db.doc("votes/" + pid + "_" + uid);
+    (mine ? ref.delete() : ref.set({ pid: pid, uid: uid })).catch(fail);
+  }
+
+  // ---------- Formulário ----------
+  function openForm(show) { $("form-panel").hidden = !show; if (show) $("f-name").focus(); }
+  function resetForm() {
+    editingId = null; $("form").reset(); $("f-msg").textContent = ""; $("f-msg").className = "msg";
+    $("form-title").textContent = "Adicionar produto"; $("f-room").value = "Sala";
+  }
+  function startEdit(p) {
+    editingId = p.id;
+    $("form-title").textContent = "Editar produto";
+    $("f-name").value = p.name || ""; $("f-price").value = p.price ? String(p.price).replace(".", ",") : "";
+    $("f-room").value = p.room || "Outros"; $("f-store").value = p.store || "";
+    $("f-link").value = p.link || ""; $("f-note").value = p.note || "";
+    openForm(true); $("form-panel").scrollIntoView({ block: "start" });
+  }
+
+  function setup() {
+    ROOMS.forEach(function (r) { var o = el("option", null, r); o.value = r; $("f-room").appendChild(o); });
+    $("add-btn").addEventListener("click", function () { resetForm(); openForm(true); });
+    $("f-cancel").addEventListener("click", function () { resetForm(); openForm(false); });
+    $("form").addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      var name = $("f-name").value.trim(), msg = $("f-msg");
+      if (!name) { msg.textContent = "Escreva o nome do produto."; msg.className = "msg err"; $("f-name").focus(); return; }
+      var rawLink = $("f-link").value.trim(), link = cleanLink(rawLink);
+      if (rawLink && !link) { msg.textContent = "O link não parece válido. Confira o endereço."; msg.className = "msg err"; $("f-link").focus(); return; }
+      var data = { name: name, price: parsePrice($("f-price").value), room: $("f-room").value,
+                   store: $("f-store").value.trim(), link: link, note: $("f-note").value.trim() };
+      var btn = $("f-save"); btn.disabled = true;
+      var op = editingId ? db.doc("products/" + editingId).update(data)
+                         : db.collection("products").add(Object.assign(data, { status: "open", createdAt: Date.now() }));
+      op.then(function () { resetForm(); openForm(false); })
+        .catch(function () { msg.textContent = "Não foi possível salvar. Tente novamente."; msg.className = "msg err"; })
+        .then(function () { btn.disabled = false; });
+    });
+    renderFilters();
+  }
+
+  function init() {
+    try {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+    } catch (e) {
+      $("load-msg").textContent = "Não foi possível conectar ao banco agora.";
+      $("load-msg").className = "msg err";
+      return;
+    }
+    uid = getUid();
+    isAdmin = true;
+    canVote = true;
+    $("add-btn").hidden = false;
+
+    var timer = setTimeout(function () {
+      $("load-msg").textContent = "A lista está demorando para carregar. Os dados podem estar desatualizados.";
+    }, 10000);
+
+    db.collection("products").onSnapshot(function (snap) {
+      products = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+      loaded = true; clearTimeout(timer); $("load-msg").hidden = true;
+      render();
+    }, function () {
+      clearTimeout(timer);
+      $("load-msg").hidden = false;
+      $("load-msg").textContent = "Não foi possível abrir a lista agora. Confira as regras do banco no Firebase.";
+      $("load-msg").className = "msg err";
+    });
+
+    db.collection("votes").onSnapshot(function (snap) {
+      votes = snap.docs.map(function (d) { return d.data(); });
+      render();
+    }, function () {});
+  }
+
+  setup();
+  init();
+})();
+</script>
+
+</body>
+</html>
