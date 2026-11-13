@@ -12,7 +12,7 @@
         button { padding: 10px 15px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 4px; }
         button:hover { background-color: #218838; }
         
-        /* Estilo do "card" do produto que vai aparecer */
+        /* Estilo do "card" do produto */
         .card-produto { 
             border: 1px solid #ddd; 
             padding: 15px; 
@@ -23,6 +23,9 @@
         .card-produto img { max-width: 100%; border-radius: 4px; margin-bottom: 10px; }
         .card-produto h3 { margin: 0 0 10px 0; font-size: 1.2em; color: #333; }
         .card-produto p { color: #666; font-size: 0.9em; line-height: 1.4; }
+        
+        /* Estilo para mensagens de erro */
+        .erro { color: #dc3545; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -30,35 +33,67 @@
     <h2>Adicionar Item de Decoração</h2>
     
     <div class="input-group">
-        <!-- Campo onde você cola o link -->
-        <input type="url" id="linkInput" placeholder="Cole o link do produto aqui (ex: https://...)">
+        <input type="url" id="linkInput" placeholder="Cole o link completo aqui (ex: https://...)">
         <button onclick="buscarDadosDoLink()">Puxar Informações</button>
     </div>
 
-    <!-- Mensagem de status enquanto carrega -->
     <p id="statusMensagem" style="display: none; color: #007bff;">Carregando informações do site...</p>
 
-    <!-- Div vazia onde o JavaScript vai injetar o produto -->
     <div id="areaDoProduto"></div>
 
     <script>
-        // Função assíncrona que é chamada quando o botão é clicado
+        // Função responsável por buscar os dados
         async function buscarDadosDoLink() {
-            // 1. Capturar os elementos da tela
             const url = document.getElementById('linkInput').value;
             const areaDoProduto = document.getElementById('areaDoProduto');
             const statusMensagem = document.getElementById('statusMensagem');
 
-            // 2. Validação simples: verificar se o usuário digitou algo
+            // Validação: Garante que o usuário digitou algo
             if (!url) {
-                alert("Por favor, cole um link antes de buscar.");
+                alert("Por favor, cole um link antes de clicar em buscar.");
                 return;
             }
 
-            // 3. Preparar a tela para a busca
-            statusMensagem.style.display = 'block'; // Mostra o texto "Carregando..."
-            areaDoProduto.innerHTML = '';           // Limpa buscas anteriores
+            // Limpa mensagens anteriores e mostra que está carregando
+            statusMensagem.style.display = 'block';
+            areaDoProduto.innerHTML = '';           
 
             try {
-                // 4. Comunicação com a API do Microlink
-                // O encodeURIComponent garante que barras e caracteres especiais no link não quebrem a URL
+                // Faz a requisição para a API
+                const resposta = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}`);
+                const dados = await resposta.json();
+
+                // >>> NOSSO ESPIÃO DE CÓDIGO (Console.log) <<<
+                // Isso vai imprimir no console do navegador tudo o que a API nos devolveu
+                console.log("DADOS RECEBIDOS DA API:", dados);
+
+                statusMensagem.style.display = 'none';
+
+                // Verifica se a API conseguiu ler o site corretamente
+                if (dados.status === 'success' && dados.data) {
+                    const info = dados.data;
+                    
+                    // Monta o visual na tela com os dados recebidos
+                    areaDoProduto.innerHTML = `
+                        <div class="card-produto">
+                            ${info.image ? `<img src="${info.image.url}" alt="Imagem do produto">` : '<p><em>Sem imagem disponível neste site</em></p>'}
+                            <h3>${info.title || 'Título não identificado'}</h3>
+                            <p>${info.description || 'Descrição não disponível no site.'}</p>
+                            <a href="${info.url}" target="_blank">Acessar no site original</a>
+                        </div>
+                    `;
+                } else {
+                    // Mensagem caso o site tenha bloqueado a leitura
+                    areaDoProduto.innerHTML = '<p class="erro">O site original bloqueou a leitura das informações (anti-robô) ou o link é inválido. Veja o Console (F12) para detalhes.</p>';
+                }
+
+            } catch (erro) {
+                statusMensagem.style.display = 'none';
+                areaDoProduto.innerHTML = '<p class="erro">Erro de conexão. Verifique o Console (F12).</p>';
+                // O console.error ajuda a identificar falhas graves de JavaScript
+                console.error("Detalhes do erro fatal:", erro);
+            }
+        }
+    </script>
+</body>
+</html>
